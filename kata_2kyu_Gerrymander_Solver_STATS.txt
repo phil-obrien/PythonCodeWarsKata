@@ -1,0 +1,87 @@
+STATS:
+
+398012 permutation count
+159.12166237831116 segments
+
+(all five districts, no restriction on repeated intra-district segment processing
+
+==================
+
+count =  123861
+129.1598470211029
+
+(all five districts, no restriction on repeated intra-district segment processing EXCEPT
+ for D5 which has been improved (can still be improved more with unique sorted row checking))
+
+===================
+
+count =  123861
+84.98369789123535
+
+same code as above but split into five functions new, one for each district processing!
+
+===================
+
+count =  4006
+22.752162218093872
+
+All 5 districts, coded to prevent duplicate-segment combos
+(uses lists to store previous combos. need to get this down to 1 second in total? or less?
+try sorting arrays in-line and adding them to deques (instead of creating & sorting lists?)
+===================
+
+count =  4006
+15.700984477996826
+
+As above but start all FOR loops with np.argmin(a), e.g.
+for d5_all_segments in range(np.argmin(a),26):
+
+...as this np.argmin(a) feature finds the "arg" of the first occurence of the smallest
+number in an array, and luckily we are looking for the 1st zero, which is the smallest number!
+===================
+
+we have:
+
+00000
+11
+
+...and we're trying to find a new place for the second 1 (in pos 6)
+
+Currently the code tries to put a 1 in pos 7, tests to see if it adjacent to another 1, uses
+the AND clause to make sure that it isn't adjacent to where it "was" (pos 6) and if it passes
+both clauses, a new valid position is found.
+
+Why don't you REMOVE the 1 in position 6 that we're trying to find a new position for first? Then
+you can remove the AND clause.
+(Result - knocked a couple of seconds off processing time)
+
+How is this 1 in position 6 to be removed? Well, in order to be here, we're either placing that
+second 1 for the first time (we don't need AND for that anyway) or we're coming back having cleared
+all subsequent 1's, 2's etc. So, just clear out FROM AND INCLUDING dst/seg we're placing and then
+rely on FOR Loop counter to prevent us from placing the "1" in the same place again.
+(Result - minor improvement?)
+
+Also, maybe run an IF test to make sure you DON'T do clearouts if we're coming in to place a given
+district/segment for the "first" time (or "subsequent-first" if all following dist/seg combos had
+been cleared out anyway. This test can be based on m[] of the dst/seg we're placing. Is it -1? Well
+then it isn't allocated, and hence all subsequent dst/segs CANNOT be currently allocated either!!
+(Result - massive improvement after IF statements applied (From 15 down to 8.5 seconds!)
+===
+Use backups of a and m in an array of arrays to replace clear_all_from_here section
+(Result - Processing time reduced from 7 seconds to 5.5 seconds on codewars!)
+
+====
+            elif d4sx == 24:
+                break_to_D3S4 = True
+                break # this needs to bring us to start of D3S4 logic!!!!!
+        elif d4sx == 24: # we get here if we've passed through all spaces and can't find valid place to put this segment
+            break_to_D3S4 = True
+            break # this needs to bring us to start of D3S4 logic!!!!!
+
+replace convoluted break_to_blah with a simple return statement
+(Result - 5.5 seconds to 5.2)
+===
+Trapped-Zero (now called Trapped-Minus-1) testing should only be done AFTER 5 1's have been selected,
+ AND AFTER 5 3's have been selected. -2's CANNOT be trapped after 0's are placed, nor after 4's.
+ In the case of 3's, all we have left are the 5 slots for 4's so let that routine cover trapped -1's
+ created in placing of 3's.
